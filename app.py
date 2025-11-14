@@ -5,7 +5,11 @@ from models import Field, Crop, CropHistory, User
 from neural_network_recommender import recommender
 from calculator_api import calculate_profit_with_rotation
 from utils import seed_initial_crops
+from price_updater import update_all_crop_prices, get_price_update_status
 from datetime import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+import atexit
 
 app = Flask(__name__)
 
@@ -42,8 +46,93 @@ with app.app_context():
         db.create_all()
         db.create_all(bind_key='users')
         print("Таблицы базы данных успешно созданы")
+        
+        # Миграция: добавление колонки last_price_update, если её нет
+        try:
+            from sqlalchemy import inspect, text
+            inspector = inspect(db.engine)
+            columns = [col['name'] for col in inspector.get_columns('crops')]
+            
+            if 'last_price_update' not in columns:
+                print("Добавление колонки last_price_update в таблицу crops...")
+                with db.engine.connect() as conn:
+                    conn.execute(text("ALTER TABLE crops ADD COLUMN last_price_update DATETIME"))
+                    conn.commit()
+                print("Колонка last_price_update успешно добавлена")
+                
+                # Устанавливаем старую дату (25 часов назад) для существующих записей
+                # Это позволит системе сразу обновить цены при первом запуске
+                with db.engine.connect() as conn:
+                    # Обновляем все записи, у которых дата NULL или очень свежая (вероятно, из предыдущей миграции)
+                    conn.execute(text("""
+                        UPDATE crops 
+                        SET last_price_update = datetime('now', '-25 hours') 
+                        WHERE last_price_update IS NULL 
+                           OR datetime(last_price_update) > datetime('now', '-1 hour')
+                    """))
+                    conn.commit()
+                print("Установлена дата обновления для существующих записей (25 часов назад для немедленного обновления)")
+        except Exception as migration_error:
+            print(f"Предупреждение при миграции: {migration_error}")
+            
     except Exception as e:
         print(f"Предупреждение при создании таблиц: {e}")
+
+# Настройка планировщика для автоматического обновления цен
+scheduler = BackgroundScheduler()
+scheduler.start()
+
+def scheduled_price_update():
+    """Функция для автоматического обновления цен каждые 24 часа"""
+    with app.app_context():
+        try:
+            print("\n[ПЛАНИРОВЩИК] Запуск автоматического обновления цен...")
+            update_all_crop_prices(force=False)
+            print("[ПЛАНИРОВЩИК] Обновление цен завершено\n")
+        except Exception as e:
+            print(f"[ПЛАНИРОВЩИК] Ошибка при обновлении цен: {e}\n")
+
+# Планируем обновление цен каждые 24 часа
+scheduler.add_job(
+    func=scheduled_price_update,
+    trigger=IntervalTrigger(hours=24),
+    id='update_crop_prices',
+    name='Обновление цен на культуры каждые 24 часа',
+    replace_existing=True
+)
+
+# Выполняем первое обновление при запуске
+# Проверяем, нужно ли принудительное обновление (если все даты одинаковые - значит была миграция)
+with app.app_context():
+    try:
+        from models import Crop
+        from datetime import timedelta
+        
+        # Проверяем, есть ли культуры, которые никогда не обновлялись или обновлялись недавно
+        crops = Crop.query.all()
+        need_force_update = False
+        
+        if crops:
+            # Если все культуры имеют одинаковую дату обновления (вероятно, из миграции)
+            # или если прошло менее 24 часов - делаем принудительное обновление
+            first_update = crops[0].last_price_update if crops[0].last_price_update else None
+            if first_update:
+                time_since = datetime.utcnow() - first_update
+                if time_since < timedelta(hours=24):
+                    # Все культуры обновлены недавно - вероятно, это результат миграции
+                    # Делаем принудительное обновление при первом запуске
+                    need_force_update = True
+                    print("\n[ИНИЦИАЛИЗАЦИЯ] Обнаружены недавно обновленные культуры (миграция).")
+                    print("[ИНИЦИАЛИЗАЦИЯ] Выполняется принудительное обновление цен...")
+        
+        print("\n[ИНИЦИАЛИЗАЦИЯ] Первичное обновление цен...")
+        update_all_crop_prices(force=need_force_update)
+        print("[ИНИЦИАЛИЗАЦИЯ] Первичное обновление завершено\n")
+    except Exception as e:
+        print(f"[ИНИЦИАЛИЗАЦИЯ] Ошибка при первичном обновлении цен: {e}\n")
+
+# Остановка планировщика при выходе из приложения
+atexit.register(lambda: scheduler.shutdown())
 
 # Маршруты
 @app.route('/')
@@ -342,11 +431,47 @@ def get_current_crop_prices():
     crops = Crop.query.all()
     prices = {crop.name: crop.market_price_per_ton for crop in crops}
     
+    # Получаем статус обновления цен
+    status = get_price_update_status()
+    
     return jsonify({
         'prices': prices,
         'currency': 'RUB/тонна',
-        'last_updated': datetime.now().isoformat()
+        'last_updated': datetime.now().isoformat(),
+        'update_status': status
     })
+
+
+@app.route('/api/admin/update-prices', methods=['POST'])
+@api_login_required
+def manual_update_prices():
+    """Ручное обновление цен (для администратора)"""
+    try:
+        force = request.json.get('force', False) if request.is_json else False
+        result = update_all_crop_prices(force=force)
+        return jsonify({
+            'success': True,
+            'message': 'Цены успешно обновлены',
+            'stats': result
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/admin/price-status', methods=['GET'])
+@api_login_required
+def get_price_status():
+    """Получение статуса обновления цен"""
+    try:
+        status = get_price_update_status()
+        return jsonify(status), 200
+    except Exception as e:
+        return jsonify({
+            'error': str(e)
+        }), 500
 
 
 @app.route('/api/calculator/crops/<crop_name>', methods=['GET'])

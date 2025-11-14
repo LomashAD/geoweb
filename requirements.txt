@@ -7,6 +7,9 @@ pandas==2.1.4
 scikit-learn==1.3.2
 numpy==1.24.3
 joblib==1.3.2
+requests==2.31.0
+beautifulsoup4==4.12.2
+APScheduler==3.10.4
 
 # Примечание: psycopg2-binary нужен только для PostgreSQL
 # Для SQLite дополнительные пакеты не требуются (встроен в Python)

@@ -33,6 +33,7 @@ class Crop(db.Model):
 	yield_per_ha = db.Column(db.Float, default=0)
 	market_price_per_ton = db.Column(db.Float, default=0)
 	other_costs_per_ha = db.Column(db.Float, default=0)
+	last_price_update = db.Column(db.DateTime, default=datetime.utcnow)
 
 	def to_dict(self):
 		return {
@@ -43,7 +44,8 @@ class Crop(db.Model):
 			'fertilizer_cost_per_ha': self.fertilizer_cost_per_ha,
 			'yield_per_ha': self.yield_per_ha,
 			'market_price_per_ton': self.market_price_per_ton,
-			'other_costs_per_ha': self.other_costs_per_ha
+			'other_costs_per_ha': self.other_costs_per_ha,
+			'last_price_update': self.last_price_update.isoformat() if self.last_price_update else None
 		}
 
 
