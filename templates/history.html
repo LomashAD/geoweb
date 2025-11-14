@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}История культур - Гео-учет полей{% endblock %}
+
+{% block content %}
+<section class="main-section">
+    <h2>Журнал истории культур</h2>
+    
+    <div class="history-controls">
+        <select id="history-field-select" class="input">
+            <option value="">Выберите поле</option>
+        </select>
+        <button id="add-history-btn" class="btn btn-primary">Добавить запись</button>
+    </div>
+    
+    <div class="history-form" id="history-form" style="display:none;">
+        <select id="history-crop-select" class="input">
+            <option value="">Выберите культуру</option>
+        </select>
+        <input type="number" id="history-year" placeholder="Год" class="input" min="2000" max="2100">
+        <select id="history-season" class="input">
+            <option value="весна-лето">Весна-лето</option>
+            <option value="озимые">Озимые</option>
+            <option value="осень">Осень</option>
+        </select>
+        <textarea id="history-notes" placeholder="Примечания (необязательно)" class="input"></textarea>
+        <button id="save-history-btn" class="btn btn-success">Сохранить</button>
+        <button id="cancel-history-btn" class="btn btn-secondary">Отмена</button>
+    </div>
+    
+    <div class="history-table" id="history-table"></div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
+{% endblock %}
+

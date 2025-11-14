@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Гео-учет полей{% endblock %}</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Система гео-учета полей</h1>
+            <nav class="main-nav">
+                <a href="{{ url_for('index') }}" class="nav-btn {% if request.endpoint == 'index' %}active{% endif %}">Главная</a>
+                <a href="{{ url_for('fields_page') }}" class="nav-btn {% if request.endpoint == 'fields_page' %}active{% endif %}">Мои поля</a>
+                <a href="{{ url_for('history_page') }}" class="nav-btn {% if request.endpoint == 'history_page' %}active{% endif %}">История культур</a>
+                <a href="{{ url_for('calculator_page') }}" class="nav-btn {% if request.endpoint == 'calculator_page' %}active{% endif %}">Калькулятор</a>
+            </nav>
+        </header>
+
+        <!-- Мобильное меню-гамбургер -->
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Меню">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <div class="mobile-menu-overlay" id="mobile-menu-overlay"></div>
+
+        <div class="mobile-menu" id="mobile-menu">
+            <nav class="mobile-nav">
+                <a href="{{ url_for('index') }}" class="nav-btn {% if request.endpoint == 'index' %}active{% endif %}">Главная</a>
+                <a href="{{ url_for('fields_page') }}" class="nav-btn {% if request.endpoint == 'fields_page' %}active{% endif %}">Мои поля</a>
+                <a href="{{ url_for('history_page') }}" class="nav-btn {% if request.endpoint == 'history_page' %}active{% endif %}">История культур</a>
+                <a href="{{ url_for('calculator_page') }}" class="nav-btn {% if request.endpoint == 'calculator_page' %}active{% endif %}">Калькулятор</a>
+            </nav>
+        </div>
+
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+    <script>
+        // Мобильное меню
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+
+        function toggleMobileMenu() {
+            mobileMenuToggle.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            mobileMenuOverlay.classList.toggle('active');
+        }
+
+        mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+        mobileMenuOverlay.addEventListener('click', toggleMobileMenu);
+
+        // Закрытие меню при клике на ссылку
+        const mobileNavLinks = mobileMenu.querySelectorAll('.nav-btn');
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (mobileMenu.classList.contains('active')) {
+                    toggleMobileMenu();
+                }
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+

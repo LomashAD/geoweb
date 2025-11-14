@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Гео-учет полей{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+{% endblock %}
+
+{% block content %}
+<section class="main-section">
+    <div class="welcome-section">
+        <h2>Добро пожаловать в систему гео-учета полей</h2>
+        <p>Управляйте сельскохозяйственными полями и получайте рекомендации по севообороту для повышения урожайности</p>
+        
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="stat-fields">0</div>
+                <div class="stat-label">Поля</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-crops">0</div>
+                <div class="stat-label">Культуры</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-history">0</div>
+                <div class="stat-label">Записи истории</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-recommendations">0</div>
+                <div class="stat-label">Рекомендаций</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="recommendations-section">
+        <h2>Рекомендации по севообороту</h2>
+        <div id="all-recommendations" class="recommendations-list">
+            <p class="loading-text">Загрузка рекомендаций...</p>
+        </div>
+    </div>
+
+    <div class="last-fields-section">
+        <div class="last-fields-header">
+            <h2>Последние поля</h2>
+            <a href="{{ url_for('fields_page') }}" class="last-fields-link">Все поля</a>
+        </div>
+        <div id="last-fields-list">
+            <p class="loading-text">Загрузка полей...</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{{ url_for('static', filename='js/index.js') }}"></script>
+{% endblock %}

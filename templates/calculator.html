@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Калькулятор - Гео-учет полей{% endblock %}
+
+{% block content %}
+<section class="main-section">
+    <h2>Экономический калькулятор</h2>
+    
+    <div class="calculator-controls">
+        <select id="calc-crop-select" class="input">
+            <option value="">Выберите культуру</option>
+        </select>
+        <select id="calc-previous-crop-select" class="input">
+            <option value="">Предыдущая культура (необязательно)</option>
+        </select>
+        <input type="number" id="calc-area" placeholder="Площадь (гектары)" class="input" min="0" step="0.1">
+        <button id="calculate-btn" class="btn btn-primary">Рассчитать</button>
+    </div>
+    
+    <div id="crop-info" style="margin-top: 20px; display: none;">
+        <h3>Информация о культуре</h3>
+        <div id="crop-info-content"></div>
+    </div>
+    
+    <div class="calculator-result" id="calculator-result"></div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/calculator.js') }}"></script>
+{% endblock %}
+

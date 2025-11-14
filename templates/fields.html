@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Мои поля - Гео-учет полей{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+{% endblock %}
+
+{% block content %}
+<section class="main-section">
+    <h2>Управление полями</h2>
+    
+    <p style="color: #6b7280; margin-bottom: 20px;">Рисуйте полигоны или прямоугольники для создания полей</p>
+    
+    <div class="fields-controls">
+        <button id="add-field-btn" class="btn btn-primary">Добавить новое поле</button>
+        <button id="save-field-btn" class="btn btn-success" style="display:none;">Сохранить поле</button>
+        <button id="cancel-field-btn" class="btn btn-secondary" style="display:none;">Отмена</button>
+    </div>
+    
+    <div class="field-input" id="field-input" style="display:none;">
+        <input type="text" id="field-name" placeholder="Введите название поля" class="input">
+    </div>
+    
+    <div id="map" class="map-container"></div>
+    
+    <div style="margin-top: 40px;">
+        <h2>Мои поля</h2>
+        <div id="fields-summary" style="color: #6b7280; margin-bottom: 20px;"></div>
+        <div class="fields-list" id="fields-list"></div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+<script src="{{ url_for('static', filename='js/fields.js') }}"></script>
+{% endblock %}
+
