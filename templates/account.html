@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block title %}Личный кабинет - Гео-учет полей{% endblock %}
+
+{% block content %}
+<div class="account-container">
+    <div class="account-form-wrapper">
+        <h2>Личный кабинет</h2>
+        
+        <!-- Переключатель между входом и регистрацией -->
+        <div class="tab-switcher">
+            <button class="tab-btn active" id="login-tab" onclick="switchTab('login')">Вход</button>
+            <button class="tab-btn" id="register-tab" onclick="switchTab('register')">Регистрация</button>
+        </div>
+
+        <!-- Форма входа -->
+        <div id="login-form-container" class="form-container active">
+            <form id="login-form" method="POST" action="{{ url_for('login') }}">
+                <input type="hidden" name="form_type" value="login">
+                <div class="form-group">
+                    <label for="login-username">Имя пользователя или Email</label>
+                    <input type="text" id="login-username" name="username" required 
+                           placeholder="Введите имя пользователя или email" 
+                           autocomplete="username">
+                    <span class="error-message" id="login-username-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="login-password">Пароль</label>
+                    <input type="password" id="login-password" name="password" required 
+                           placeholder="Введите пароль"
+                           autocomplete="current-password">
+                    <span class="error-message" id="login-password-error"></span>
+                </div>
+
+                {% if request.args.get('error') and request.args.get('form') == 'login' %}
+                <div class="alert alert-error">{{ request.args.get('error') }}</div>
+                {% endif %}
+
+                <button type="submit" class="btn-primary">Войти</button>
+            </form>
+        </div>
+
+        <!-- Форма регистрации -->
+        <div id="register-form-container" class="form-container">
+            <form id="register-form" method="POST" action="{{ url_for('register') }}">
+                <input type="hidden" name="form_type" value="register">
+                <div class="form-group">
+                    <label for="register-username">Имя пользователя</label>
+                    <input type="text" id="register-username" name="username" required 
+                           placeholder="Введите имя пользователя" 
+                           minlength="3" maxlength="80">
+                    <span class="error-message" id="register-username-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" name="email" required 
+                           placeholder="Введите email">
+                    <span class="error-message" id="register-email-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="register-password">Пароль</label>
+                    <input type="password" id="register-password" name="password" required 
+                           placeholder="Введите пароль" 
+                           minlength="6">
+                    <span class="error-message" id="register-password-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="register-confirm-password">Подтвердите пароль</label>
+                    <input type="password" id="register-confirm-password" name="confirm_password" required 
+                           placeholder="Повторите пароль">
+                    <span class="error-message" id="register-confirm-password-error"></span>
+                </div>
+
+                {% if request.args.get('error') and request.args.get('form') == 'register' %}
+                <div class="alert alert-error">{{ request.args.get('error') }}</div>
+                {% endif %}
+
+                {% if request.args.get('success') and request.args.get('form') == 'register' %}
+                <div class="alert alert-success">{{ request.args.get('success') }}</div>
+                {% endif %}
+
+                <button type="submit" class="btn-primary">Зарегистрироваться</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.account-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 200px);
+    padding: 40px 20px;
+}
+
+.account-form-wrapper {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.account-form-wrapper h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #1f2937;
+    font-size: 2em;
+}
+
+.tab-switcher {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #6b7280;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: -2px;
+}
+
+.tab-btn:hover {
+    color: #3b82f6;
+}
+
+.tab-btn.active {
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
+}
+
+.form-container {
+    display: none;
+}
+
+.form-container.active {
+    display: block;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #374151;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.error-message {
+    display: block;
+    color: #ef4444;
+    font-size: 12px;
+    margin-top: 5px;
+    min-height: 18px;
+}
+
+.alert {
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.alert-error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.alert-success {
+    background-color: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 12px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #2563eb;
+}
+
+.btn-primary:active {
+    background-color: #1d4ed8;
+}
+
+@media (max-width: 600px) {
+    .account-form-wrapper {
+        padding: 30px 20px;
+    }
+}
+</style>
+
+<script>
+function switchTab(tab) {
+    // Убираем активный класс со всех вкладок и форм
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.form-container').forEach(container => container.classList.remove('active'));
+    
+    // Активируем выбранную вкладку и форму
+    if (tab === 'login') {
+        document.getElementById('login-tab').classList.add('active');
+        document.getElementById('login-form-container').classList.add('active');
+    } else {
+        document.getElementById('register-tab').classList.add('active');
+        document.getElementById('register-form-container').classList.add('active');
+    }
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const form = urlParams.get('form');
+    
+    if (form === 'register') {
+        switchTab('register');
+    } else {
+        switchTab('login');
+    }
+});
+
+// Валидация формы входа
+document.getElementById('login-form').addEventListener('submit', function(e) {
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+    
+    let isValid = true;
+    
+    document.querySelectorAll('#login-form-container .error-message').forEach(el => el.textContent = '');
+    
+    if (!username) {
+        document.getElementById('login-username-error').textContent = 'Введите имя пользователя или email';
+        isValid = false;
+    }
+    
+    if (!password) {
+        document.getElementById('login-password-error').textContent = 'Введите пароль';
+        isValid = false;
+    }
+    
+    if (!isValid) {
+        e.preventDefault();
+    }
+});
+
+// Валидация формы регистрации
+document.getElementById('register-form').addEventListener('submit', function(e) {
+    const username = document.getElementById('register-username').value;
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+    const confirmPassword = document.getElementById('register-confirm-password').value;
+    
+    let isValid = true;
+    
+    document.querySelectorAll('#register-form-container .error-message').forEach(el => el.textContent = '');
+    
+    if (username.length < 3) {
+        document.getElementById('register-username-error').textContent = 'Имя пользователя должно быть не менее 3 символов';
+        isValid = false;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        document.getElementById('register-email-error').textContent = 'Введите корректный email';
+        isValid = false;
+    }
+    
+    if (password.length < 6) {
+        document.getElementById('register-password-error').textContent = 'Пароль должен быть не менее 6 символов';
+        isValid = false;
+    }
+    
+    if (password !== confirmPassword) {
+        document.getElementById('register-confirm-password-error').textContent = 'Пароли не совпадают';
+        isValid = false;
+    }
+    
+    if (!isValid) {
+        e.preventDefault();
+    }
+});
+</script>
+{% endblock %}
+

@@ -72,6 +72,24 @@ header h1 {
     background: #10b981;
 }
 
+.user-info {
+    padding: 10px 20px;
+    color: #374151;
+    font-size: 16px;
+    font-weight: 500;
+    display: inline-block;
+    margin: 0 5px;
+}
+
+.mobile-user-info {
+    padding: 15px 20px;
+    color: #374151;
+    font-size: 16px;
+    font-weight: 500;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 10px;
+}
+
 /* Мобильное меню-гамбургер */
 .mobile-menu-toggle {
     display: none;

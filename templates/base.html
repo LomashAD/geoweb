@@ -13,10 +13,16 @@
         <header>
             <h1>Система гео-учета полей</h1>
             <nav class="main-nav">
-                <a href="{{ url_for('index') }}" class="nav-btn {% if request.endpoint == 'index' %}active{% endif %}">Главная</a>
-                <a href="{{ url_for('fields_page') }}" class="nav-btn {% if request.endpoint == 'fields_page' %}active{% endif %}">Мои поля</a>
-                <a href="{{ url_for('history_page') }}" class="nav-btn {% if request.endpoint == 'history_page' %}active{% endif %}">История культур</a>
-                <a href="{{ url_for('calculator_page') }}" class="nav-btn {% if request.endpoint == 'calculator_page' %}active{% endif %}">Калькулятор</a>
+                {% if session.get('user_id') %}
+                    <a href="{{ url_for('index') }}" class="nav-btn {% if request.endpoint == 'index' %}active{% endif %}">Главная</a>
+                    <a href="{{ url_for('fields_page') }}" class="nav-btn {% if request.endpoint == 'fields_page' %}active{% endif %}">Мои поля</a>
+                    <a href="{{ url_for('history_page') }}" class="nav-btn {% if request.endpoint == 'history_page' %}active{% endif %}">История культур</a>
+                    <a href="{{ url_for('calculator_page') }}" class="nav-btn {% if request.endpoint == 'calculator_page' %}active{% endif %}">Калькулятор</a>
+                    <span class="user-info">Пользователь: {{ session.get('username') }}</span>
+                    <a href="{{ url_for('logout') }}" class="nav-btn">Выйти</a>
+                {% else %}
+                    <a href="{{ url_for('account') }}" class="nav-btn {% if request.endpoint == 'account' %}active{% endif %}">Личный кабинет</a>
+                {% endif %}
             </nav>
         </header>
 
@@ -31,10 +37,16 @@
 
         <div class="mobile-menu" id="mobile-menu">
             <nav class="mobile-nav">
-                <a href="{{ url_for('index') }}" class="nav-btn {% if request.endpoint == 'index' %}active{% endif %}">Главная</a>
-                <a href="{{ url_for('fields_page') }}" class="nav-btn {% if request.endpoint == 'fields_page' %}active{% endif %}">Мои поля</a>
-                <a href="{{ url_for('history_page') }}" class="nav-btn {% if request.endpoint == 'history_page' %}active{% endif %}">История культур</a>
-                <a href="{{ url_for('calculator_page') }}" class="nav-btn {% if request.endpoint == 'calculator_page' %}active{% endif %}">Калькулятор</a>
+                {% if session.get('user_id') %}
+                    <a href="{{ url_for('index') }}" class="nav-btn {% if request.endpoint == 'index' %}active{% endif %}">Главная</a>
+                    <a href="{{ url_for('fields_page') }}" class="nav-btn {% if request.endpoint == 'fields_page' %}active{% endif %}">Мои поля</a>
+                    <a href="{{ url_for('history_page') }}" class="nav-btn {% if request.endpoint == 'history_page' %}active{% endif %}">История культур</a>
+                    <a href="{{ url_for('calculator_page') }}" class="nav-btn {% if request.endpoint == 'calculator_page' %}active{% endif %}">Калькулятор</a>
+                    <div class="mobile-user-info">Пользователь: {{ session.get('username') }}</div>
+                    <a href="{{ url_for('logout') }}" class="nav-btn">Выйти</a>
+                {% else %}
+                    <a href="{{ url_for('account') }}" class="nav-btn {% if request.endpoint == 'account' %}active{% endif %}">Личный кабинет</a>
+                {% endif %}
             </nav>
         </div>
 
