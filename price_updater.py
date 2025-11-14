@@ -1,7 +1,3 @@
-"""
-Модуль для обновления цен на сельскохозяйственные культуры
-Получает актуальные цены из внешних источников и обновляет базу данных
-"""
 import requests
 from datetime import datetime, timedelta
 from typing import Dict, Optional
@@ -28,21 +24,6 @@ CROP_NAME_MAPPING = {
 
 
 def get_price_from_agro_api(crop_name: str) -> Optional[Dict[str, float]]:
-    """
-    Получение цен из API агро-биржи
-    
-    ВАЖНО: Для получения реальных цен необходимо:
-    1. Зарегистрироваться на API агро-биржи (например, Московская биржа, Агро-Ру)
-    2. Получить API ключ
-    3. Реализовать запросы к реальному API
-    
-    Примеры источников:
-    - Московская биржа: https://www.moex.com/
-    - АгроРу: https://agroru.com/
-    - Агро-Инфо: https://agroinfo.com/
-    
-    Текущая реализация использует симуляцию цен с реалистичными колебаниями
-    """
     try:
         # Базовые цены за тонну (в рублях) - средние рыночные цены
         base_prices = {
@@ -75,20 +56,9 @@ def get_price_from_agro_api(crop_name: str) -> Optional[Dict[str, float]]:
         if crop_name not in base_prices:
             return None
         
-        # Симуляция реальных колебаний цен на рынке (±5-10%)
-        # В реальности эти данные должны приходить из API
         variation = random.uniform(0.90, 1.10)
         market_price = base_prices[crop_name] * variation
         seed_price = base_seed_prices[crop_name] * variation
-        
-        # Пример реального API запроса (закомментировано):
-        # response = requests.get(
-        #     f'https://api.agro-birzha.ru/prices/{crop_name}',
-        #     headers={'Authorization': f'Bearer {API_KEY}'}
-        # )
-        # data = response.json()
-        # market_price = data['market_price']
-        # seed_price = data['seed_price']
         
         return {
             'market_price_per_ton': round(market_price, 2),
@@ -100,15 +70,7 @@ def get_price_from_agro_api(crop_name: str) -> Optional[Dict[str, float]]:
 
 
 def get_price_from_web_scraping(crop_name: str) -> Optional[Dict[str, float]]:
-    """
-    Получение цен через веб-скрапинг (примерная реализация)
-    В реальности нужно парсить реальные сайты агро-бирж
-    """
     try:
-        # Здесь можно использовать requests + BeautifulSoup для парсинга
-        # Например, с сайтов типа agro.ru, agroru.com и т.д.
-        
-        # Для демонстрации используем тот же метод, что и API
         return get_price_from_agro_api(crop_name)
     except Exception as e:
         print(f"Ошибка при веб-скрапинге для {crop_name}: {e}")
@@ -116,16 +78,6 @@ def get_price_from_web_scraping(crop_name: str) -> Optional[Dict[str, float]]:
 
 
 def update_crop_prices(crop: Crop, force: bool = False) -> bool:
-    """
-    Обновление цен для конкретной культуры
-    
-    Args:
-        crop: Объект культуры из базы данных
-        force: Принудительное обновление, даже если не прошло 24 часа
-    
-    Returns:
-        True если обновление успешно, False в противном случае
-    """
     try:
         # Проверяем, нужно ли обновление
         if not force:
@@ -166,15 +118,6 @@ def update_crop_prices(crop: Crop, force: bool = False) -> bool:
 
 
 def update_all_crop_prices(force: bool = False) -> Dict[str, int]:
-    """
-    Обновление цен для всех культур в базе данных
-    
-    Args:
-        force: Принудительное обновление для всех культур
-    
-    Returns:
-        Словарь со статистикой обновлений
-    """
     crops = Crop.query.all()
     updated = 0
     skipped = 0
@@ -212,9 +155,6 @@ def update_all_crop_prices(force: bool = False) -> Dict[str, int]:
 
 
 def should_update_crop(crop: Crop) -> bool:
-    """
-    Проверка, нужно ли обновлять цены для культуры
-    """
     if not crop.last_price_update:
         return True
     
@@ -223,9 +163,6 @@ def should_update_crop(crop: Crop) -> bool:
 
 
 def get_price_update_status() -> Dict:
-    """
-    Получение статуса обновления цен для всех культур
-    """
     crops = Crop.query.all()
     status = {
         'total': len(crops),
