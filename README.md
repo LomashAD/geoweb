@@ -245,7 +245,7 @@ python utils.py check
 4. Запушьте в ветку (`git push origin feature/AmazingFeature`)
 5. Откройте Pull Request
 
-## Автор
+## Авторы:Стародубов Владимир, Евсеенко Роман, Лиходедов Александр
 
 Ваше имя или организация
 
